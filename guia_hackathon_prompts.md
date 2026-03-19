@@ -3,7 +3,7 @@
 
 **Tiempo total:** 90 minutos  
 **Herramienta:** Snowflake Cortex Code (CoCo) — todo se hace con prompts en el IDE  
-**Objetivo:** Construir un pipeline end-to-end Bronze > Silver > Gold + 3 casos de uso AI
+**Objetivo:** Construir un pipeline end-to-end Bronze > Silver > Gold + 3 casos de uso AI + Semantic View + Cortex Agent
 
 ---
 
@@ -19,25 +19,26 @@ Ejecuta: SELECT CURRENT_ROLE(), CURRENT_WAREHOUSE(), CURRENT_DATABASE(), CURRENT
 
 ### Datos disponibles
 
-Los 4 ficheros JSON ya estan cargados en un stage de Snowflake:
+Los 4 ficheros JSON estan en un repositorio Git de GitHub que conectaremos a Snowflake:
 
 ```
-@TELCO.FICHEROS/
-  ├── customers.json        (350 clientes)
-  ├── network_events.json   (10,000 eventos de red)
-  ├── tickets.json          (750 tickets de soporte)
-  └── billing_usage.json    (2,000 registros de facturacion)
+https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon/
+  └── data/
+        ├── customers.json        (350 clientes)
+        ├── network_events.json   (10,000 eventos de red)
+        ├── tickets.json          (750 tickets de soporte)
+        └── billing_usage.json    (2,000 registros de facturacion)
 ```
 
-Puedes verificarlos con:
+Una vez creada la integracion Git en Snowflake, los ficheros estaran disponibles en:
 ```
-Muestra los ficheros disponibles en el stage @TELCO.FICHEROS con LIST @TELCO.FICHEROS;
+@TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/
 ```
 
 ### Arquitectura objetivo
 
 ```
-@TELCO.FICHEROS (JSON)
+GitHub Repo (JSON) --> Git Integration --> Snowflake
          │
    ┌─────▼─────────────────────────────────────────────┐
    │  BRONZE (raw JSON en tablas VARIANT)               │
@@ -58,7 +59,7 @@ Muestra los ficheros disponibles en el stage @TELCO.FICHEROS con LIST @TELCO.FIC
 
 | Rol | Que hace | Cuando |
 |-----|----------|--------|
-| **Ingeniero de ingesta** | Carga los 4 JSON desde el stage a Bronze | Fase 1 |
+| **Ingeniero de ingesta** | Conecta el repo Git y carga los 4 JSON a Bronze | Fase 1 |
 | **Ingeniero dbt 1** | Modelos Silver (flatten + cast) | Fase 2 |
 | **Ingeniero dbt 2** | Modelos Gold (KPIs + metricas) | Fase 2 |
 | **Ingeniero AI** | 3 prompts Cortex + Semantic View + Agent | Fase 3-5 |
@@ -66,9 +67,9 @@ Muestra los ficheros disponibles en el stage @TELCO.FICHEROS con LIST @TELCO.FIC
 
 ---
 
-## FASE 1: BRONZE — Ingesta de JSON (25 minutos)
+## FASE 1: BRONZE — Ingesta de JSON via Git Integration (25 minutos)
 
-> **Objetivo:** Cargar los 4 ficheros JSON del stage @TELCO.FICHEROS como tablas raw en Bronze.
+> **Objetivo:** Conectar el repositorio Git de GitHub a Snowflake y cargar los 4 ficheros JSON como tablas raw en Bronze.
 
 ### Paso 1.1 — Crear la base de datos y esquemas
 
@@ -81,24 +82,73 @@ Usa el warehouse SNOWADHOC.
 
 > **Resultado esperado:** CoCo generara el SQL con CREATE DATABASE y CREATE SCHEMA. Ejecutalo.
 
-### Paso 1.2 — Crear el file format para JSON
+### Paso 1.2 — Crear la integracion con el repositorio Git
+
+```
+Necesito conectar Snowflake a un repositorio publico de GitHub para cargar datos JSON.
+El repositorio es: https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon
+
+Crea una API Integration de tipo git_https_api que permita acceder a 
+https://github.com/Snowflake-Spain-SE-Demos-Sandbox
+y luego crea un Git Repository en TELCO_COPILOT.PUBLIC llamado HACKATHON_REPO 
+que apunte a ese repositorio.
+
+No necesita autenticacion porque es un repo publico.
+```
+
+> **SQL directo:**
+
+```sql
+CREATE OR REPLACE API INTEGRATION GIT_HACKATHON_INTEGRATION
+  API_PROVIDER = git_https_api
+  API_ALLOWED_PREFIXES = ('https://github.com/Snowflake-Spain-SE-Demos-Sandbox')
+  ENABLED = TRUE;
+
+CREATE OR REPLACE GIT REPOSITORY TELCO_COPILOT.PUBLIC.HACKATHON_REPO
+  API_INTEGRATION = GIT_HACKATHON_INTEGRATION
+  ORIGIN = 'https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon.git';
+```
+
+> **Nota:** Si no tienes permisos para crear la API Integration, pide al mentor que la ejecute
+> con un rol ACCOUNTADMIN y te otorgue USAGE sobre ella.
+
+### Paso 1.3 — Sincronizar el repositorio y verificar los ficheros
+
+```
+Sincroniza el repositorio Git TELCO_COPILOT.PUBLIC.HACKATHON_REPO con ALTER GIT REPOSITORY ... FETCH
+y luego lista los ficheros disponibles en la rama main con:
+LIST @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/
+```
+
+> **SQL directo:**
+
+```sql
+ALTER GIT REPOSITORY TELCO_COPILOT.PUBLIC.HACKATHON_REPO FETCH;
+
+LIST @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/;
+```
+
+> **Resultado esperado:** Deberias ver los 4 ficheros JSON listados (customers.json, network_events.json, tickets.json, billing_usage.json).
+
+### Paso 1.4 — Crear el file format para JSON
 
 ```
 En la base de datos TELCO_COPILOT, esquema BRONZE, crea un file format de tipo JSON 
 llamado JSON_FORMAT con STRIP_OUTER_ARRAY = TRUE para poder leer arrays de objetos JSON.
 ```
 
-### Paso 1.3 — Crear las tablas Bronze y cargar desde el stage
+### Paso 1.5 — Crear las tablas Bronze y cargar desde el repositorio Git
 
 ```
 Crea 4 tablas en el esquema TELCO_COPILOT.BRONZE y carga los datos JSON 
-desde el stage @TELCO.FICHEROS usando el file format JSON_FORMAT.
+desde el repositorio Git @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/
+usando el file format JSON_FORMAT.
 
 Las tablas deben ser:
-- RAW_CUSTOMERS: carga desde @TELCO.FICHEROS/customers.json
-- RAW_NETWORK_EVENTS: carga desde @TELCO.FICHEROS/network_events.json
-- RAW_TICKETS: carga desde @TELCO.FICHEROS/tickets.json
-- RAW_BILLING_USAGE: carga desde @TELCO.FICHEROS/billing_usage.json
+- RAW_CUSTOMERS: carga desde @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/customers.json
+- RAW_NETWORK_EVENTS: carga desde @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/network_events.json
+- RAW_TICKETS: carga desde @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/tickets.json
+- RAW_BILLING_USAGE: carga desde @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/billing_usage.json
 
 Cada tabla debe tener:
 - columna SRC de tipo VARIANT con el objeto JSON
@@ -120,7 +170,7 @@ CREATE OR REPLACE TABLE RAW_CUSTOMERS (
     FILENAME VARCHAR DEFAULT METADATA$FILENAME
 );
 COPY INTO RAW_CUSTOMERS (SRC, LOAD_TS, FILENAME)
-FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO.FICHEROS/customers.json)
+FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/customers.json)
 FILE_FORMAT = (TYPE = 'JSON', STRIP_OUTER_ARRAY = TRUE);
 
 CREATE OR REPLACE TABLE RAW_NETWORK_EVENTS (
@@ -129,7 +179,7 @@ CREATE OR REPLACE TABLE RAW_NETWORK_EVENTS (
     FILENAME VARCHAR DEFAULT METADATA$FILENAME
 );
 COPY INTO RAW_NETWORK_EVENTS (SRC, LOAD_TS, FILENAME)
-FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO.FICHEROS/network_events.json)
+FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/network_events.json)
 FILE_FORMAT = (TYPE = 'JSON', STRIP_OUTER_ARRAY = TRUE);
 
 CREATE OR REPLACE TABLE RAW_TICKETS (
@@ -138,7 +188,7 @@ CREATE OR REPLACE TABLE RAW_TICKETS (
     FILENAME VARCHAR DEFAULT METADATA$FILENAME
 );
 COPY INTO RAW_TICKETS (SRC, LOAD_TS, FILENAME)
-FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO.FICHEROS/tickets.json)
+FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/tickets.json)
 FILE_FORMAT = (TYPE = 'JSON', STRIP_OUTER_ARRAY = TRUE);
 
 CREATE OR REPLACE TABLE RAW_BILLING_USAGE (
@@ -147,11 +197,11 @@ CREATE OR REPLACE TABLE RAW_BILLING_USAGE (
     FILENAME VARCHAR DEFAULT METADATA$FILENAME
 );
 COPY INTO RAW_BILLING_USAGE (SRC, LOAD_TS, FILENAME)
-FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO.FICHEROS/billing_usage.json)
+FROM (SELECT $1, CURRENT_TIMESTAMP(), METADATA$FILENAME FROM @TELCO_COPILOT.PUBLIC.HACKATHON_REPO/branches/main/data/billing_usage.json)
 FILE_FORMAT = (TYPE = 'JSON', STRIP_OUTER_ARRAY = TRUE);
 ```
 
-### Paso 1.4 — Validar la carga
+### Paso 1.6 — Validar la carga
 
 ```
 Haz un SELECT COUNT(*) de cada una de las 4 tablas Bronze en TELCO_COPILOT.BRONZE

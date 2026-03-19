@@ -47,7 +47,9 @@
 
 ### Entornos Snowflake
 - [ ] Crear 6 cuentas/entornos Snowflake (uno por equipo)
-- [ ] Cargar dataset telco JSON en stage de cada entorno (customers, network_events, tickets, billing_usage)
+- [ ] Verificar que el repositorio Git de GitHub es accesible: https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon
+- [ ] Crear la API Integration GIT_HACKATHON_INTEGRATION en cada entorno (requiere ACCOUNTADMIN)
+- [ ] Probar la conexion Git Repository + COPY INTO en un entorno de prueba
 - [ ] Verificar que Cortex Code esta habilitado en todos los entornos
 - [ ] Verificar acceso a funciones Cortex AI (COMPLETE, SUMMARIZE, CLASSIFY)
 - [ ] Verificar acceso a CREATE SEMANTIC VIEW y CREATE AGENT
@@ -56,7 +58,7 @@
 - [ ] Preparar credenciales de acceso en tarjetas individuales por equipo
 
 ### Materiales por Equipo
-- [ ] Guia de equipo impresa (flujo Bronze > Silver > Gold > AI > Semantic View > Agent + prompts CoCo)
+- [ ] Guia de equipo impresa (flujo Git Integration > Bronze > Silver > Gold > AI > Semantic View > Agent + prompts CoCo)
 - [ ] Tarjeta de credenciales Snowflake (usuario, password, URL)
 - [ ] Quick reference card: funciones Cortex AI + sintaxis CREATE SEMANTIC VIEW + CREATE AGENT
 - [ ] Hoja de evaluacion para jueces (por equipo)
@@ -118,7 +120,7 @@
 |----------|----------|
 | "No puedo acceder a Snowflake" | Verificar credenciales. Mentor usa cuenta admin para resetear |
 | "Cortex Code no responde" | Refrescar navegador. Verificar warehouse activo |
-| "El JSON no carga" | Verificar formato del stage. Mentor tiene script de carga de backup |
+| "El JSON no carga" | Verificar Git Integration y FETCH. Mentor tiene API Integration de backup |
 | "dbt da error" | Revisar profile.yml. Mentor tiene proyecto dbt de referencia |
 | "Cortex AI devuelve error" | Verificar que el warehouse tiene creditos. Comprobar sintaxis del prompt |
 | "CREATE SEMANTIC VIEW falla" | Revisar nombres de tabla/columna. Verificar que las tablas Gold existen |
@@ -128,7 +130,9 @@
 
 ### Entorno de Backup
 - [ ] Tener un entorno Snowflake pre-construido con Bronze/Silver/Gold ya listo
-- [ ] Script SQL para cargar el dataset rapido si falla la ingesta
+- [ ] API Integration GIT_HACKATHON_INTEGRATION pre-creada con ACCOUNTADMIN
+- [ ] Script SQL para cargar el dataset rapido si falla la ingesta via Git
+- [ ] Proyecto dbt de referencia con modelos Silver y Gold funcionales
 - [ ] Proyecto dbt de referencia con modelos Silver y Gold funcionales
 - [ ] 3 queries SQL con los prompts Cortex AI ya escritos
 - [ ] SQL de CREATE SEMANTIC VIEW y CREATE AGENT pre-escrito por si falla CoCo

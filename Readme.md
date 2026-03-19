@@ -12,7 +12,7 @@
 ## Objetivo
 
 Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cortex Code como unico IDE:
-- Ingestar datos semi-estructurados JSON (customers, network_events, tickets, billing_usage)
+- Conectar un repositorio Git de GitHub a Snowflake e ingestar datos JSON (customers, network_events, tickets, billing_usage)
 - Transformar con patron medallion Bronze / Silver / Gold usando dbt
 - Aplicar 3 casos de uso AI con Cortex sobre la capa Gold
 - Crear una Semantic View para consultas en lenguaje natural (NL2SQL)
@@ -26,11 +26,11 @@ Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cor
 |------|----------|--------|-------------|
 | 09:30 - 10:00 | 30 min | **Recepcion y registro** | Acreditacion, entrega de materiales, cafe de bienvenida |
 | 10:00 - 10:15 | 15 min | **Bienvenida** | Apertura institucional Snowflake. Presentacion del evento, objetivos y mecanica |
-| 10:15 - 10:35 | 20 min | **Keynote: Cortex Code** | Demo en vivo de Cortex Code (CoCo). Mostrar el flujo end-to-end: ingesta JSON, transformacion medallion, AI prompts, Semantic View y Copilot Agent |
-| 10:35 - 10:45 | 10 min | **Presentacion del reto** | Explicacion del dataset telco (JSON), la arquitectura Bronze/Silver/Gold/AI/SV/Agent y los 5 fases del hackathon |
+| 10:15 - 10:35 | 20 min | **Keynote: Cortex Code** | Demo en vivo de Cortex Code (CoCo). Mostrar el flujo end-to-end: Git integration, transformacion medallion, AI prompts, Semantic View y Copilot Agent |
+| 10:35 - 10:45 | 10 min | **Presentacion del reto** | Explicacion del dataset telco (GitHub repo), la arquitectura Git > Bronze/Silver/Gold/AI/SV/Agent y las 5 fases del hackathon |
 | 10:45 - 10:50 | 5 min | **Formacion de equipos** | Asignacion de mesas, entrega de guias por equipo, acceso a entornos Snowflake |
 | 10:50 - 12:20 | 90 min | **Hackathon - Manos a la obra** | Trabajo en equipos. Cada equipo sigue su guia usando Cortex Code como herramienta principal |
-| | | *Fase 1 - Bronze (25 min)* | Ingesta de JSON semi-estructurado desde @TELCO.FICHEROS y creacion de la capa Bronze (raw) |
+| | | *Fase 1 - Bronze (25 min)* | Conectar repo Git de GitHub a Snowflake e ingestar JSON como capa Bronze (raw) |
 | | | *Fase 2 - Silver/Gold (35 min)* | Transformacion con dbt: Silver (tablas normalizadas) y Gold (customer_360, network_health, revenue_at_risk) |
 | | | *Fase 3 - AI (20 min)* | 3 prompts Cortex AI: clasificacion de tickets, resumen ejecutivo de cuenta, recomendacion de retencion |
 | | | *Fase 4 - Semantic View (5 min)* | Crear Semantic View sobre Gold/Silver con dimensiones, metricas e instrucciones NL2SQL |
@@ -45,7 +45,7 @@ Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cor
 ## Arquitectura del Reto
 
 ```
-@TELCO.FICHEROS (JSON)
+GitHub Repo (JSON) --> Git Integration --> Snowflake
         |
    [ BRONZE ]  Raw JSON en Snowflake (customers, network_events, tickets, billing_usage)
         |
@@ -76,7 +76,7 @@ Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cor
 
 | Capa | Entregable |
 |------|-----------|
-| Bronze | Tablas raw con JSON semi-estructurado cargado desde @TELCO.FICHEROS |
+| Bronze | Tablas raw con JSON semi-estructurado cargado desde repositorio Git de GitHub |
 | Silver | Tablas normalizadas (stg_customers, stg_network_events, stg_tickets, stg_billing_usage) con tests dbt |
 | Gold | Vistas analiticas con KPIs (customer_360, network_health, revenue_at_risk) |
 | AI | 3 vistas Cortex AI funcionando sobre la capa Gold |
@@ -100,8 +100,14 @@ Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cor
 
 ## Dataset Telco (JSON)
 
-Ficheros JSON semi-estructurados disponibles en el stage `@TELCO.FICHEROS`:
+Ficheros JSON semi-estructurados en el repositorio Git de GitHub:
+
+**Repositorio:** https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon  
+**Ruta de datos:** `data/`
+
 - **customers.json**: 350 clientes telco (customer_id, company_name, plan, region, segment, monthly_revenue_eur, nps_score)
 - **network_events.json**: 10,000 eventos de red (event_id, customer_id, event_type, severity, cell_tower_id, duration_ms)
 - **tickets.json**: 750 tickets de soporte (ticket_id, customer_id, category, priority, description, sla_breached)
 - **billing_usage.json**: 2,000 registros de facturacion (billing_id, customer_id, service_type, amount_eur, payment_status)
+
+Durante el hackathon, los equipos conectaran este repositorio a Snowflake via Git Integration y cargaran los datos directamente.
