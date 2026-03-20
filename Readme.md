@@ -9,6 +9,23 @@
 
 ---
 
+## Requisito Previo: Cuenta Trial de Snowflake
+
+Cada participante debe crear su cuenta trial **antes del evento** (o al inicio del hackathon):
+
+1. Ir a **https://signup.snowflake.com/**
+2. Rellenar el formulario con email corporativo
+3. Seleccionar:
+   - **Cloud Provider:** AWS
+   - **Edition:** Enterprise
+   - **Region:** US West (Oregon)
+4. Activar la cuenta desde el email de confirmacion
+5. La cuenta incluye **$400 en creditos** y 30 dias de validez
+
+> Los mentores ayudaran a configurar Cortex Code en las cuentas al inicio del hackathon.
+
+---
+
 ## Objetivo
 
 Cada equipo construira una mini plataforma telco end-to-end usando Snowflake Cortex Code como unico IDE:
@@ -111,3 +128,25 @@ Ficheros JSON semi-estructurados en el repositorio Git de GitHub:
 - **billing_usage.json**: 2,000 registros de facturacion (billing_id, customer_id, service_type, amount_eur, payment_status)
 
 Durante el hackathon, los equipos conectaran este repositorio a Snowflake via Git Integration y cargaran los datos directamente.
+
+---
+
+## Revision de Costes Post-Hackathon
+
+Al finalizar el hackathon, cada participante puede revisar el consumo de su cuenta trial:
+
+```sql
+-- Creditos consumidos por tipo de servicio
+SELECT service_type, ROUND(SUM(credits_used), 2) AS total_credits
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY 
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY service_type ORDER BY total_credits DESC;
+
+-- Consumo de funciones Cortex AI
+SELECT function_name, model_name, SUM(tokens) AS total_tokens, ROUND(SUM(token_credits), 4) AS total_credits
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_FUNCTIONS_USAGE_HISTORY 
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY function_name, model_name ORDER BY total_credits DESC;
+```
+
+> **Nota:** Las vistas de ACCOUNT_USAGE tienen un retraso de hasta 2 horas. Revisad al dia siguiente para datos completos.

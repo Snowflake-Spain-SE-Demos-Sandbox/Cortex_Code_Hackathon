@@ -37,7 +37,9 @@
 ### Comunicaciones
 - [ ] Enviar save-the-date (T-4 semanas)
 - [ ] Enviar invitacion formal con agenda y requisitos (T-2 semanas)
+- [ ] **Incluir instrucciones de creacion de cuenta trial en la invitacion** (AWS, Enterprise, US West Oregon) — https://signup.snowflake.com/
 - [ ] Recordatorio con instrucciones de acceso al edificio (T-3 dias)
+- [ ] Recordatorio: verificar que la cuenta trial esta activa y Cortex Code accesible (T-1 dia)
 - [ ] Confirmar asistencia final (T-1 semana)
 - [ ] Preparar email post-evento con fotos y recursos
 
@@ -161,3 +163,37 @@
 - [ ] Publicar highlights en LinkedIn / redes internas
 - [ ] Agendar follow-ups con los equipos mas interesados en Snowflake
 - [ ] Informe interno: asistencia, NPS, leads generados
+- [ ] **Revisar costes de Cortex Code y AI** — ejecutar queries de consumo en cada cuenta trial
+
+### Revision de Costes del Hackathon
+
+Al dia siguiente del evento (para que ACCOUNT_USAGE tenga datos completos), ejecutar en cada cuenta trial:
+
+```sql
+-- Creditos por tipo de servicio
+SELECT service_type, ROUND(SUM(credits_used), 2) AS total_credits
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY 
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY service_type ORDER BY total_credits DESC;
+
+-- Consumo funciones Cortex AI
+SELECT function_name, model_name, SUM(tokens) AS total_tokens, ROUND(SUM(token_credits), 4) AS total_credits
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_FUNCTIONS_USAGE_HISTORY 
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY function_name, model_name ORDER BY total_credits DESC;
+
+-- Consumo Cortex Analyst (Semantic View + Agent)
+SELECT username, ROUND(SUM(credits), 4) AS total_credits, SUM(request_count) AS total_requests
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_ANALYST_USAGE_HISTORY 
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY username ORDER BY total_credits DESC;
+
+-- Warehouse con estimacion USD ($3/credito Enterprise)
+SELECT warehouse_name, ROUND(SUM(credits_used), 2) AS total_credits,
+    ROUND(SUM(credits_used) * 3.00, 2) AS estimated_cost_usd
+FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+WHERE start_time >= '2026-05-28' AND start_time < '2026-05-29'
+GROUP BY warehouse_name ORDER BY total_credits DESC;
+```
+
+> **Nota:** Las vistas de ACCOUNT_USAGE tienen un retraso de hasta 2 horas. Revisad al dia siguiente del hackathon.

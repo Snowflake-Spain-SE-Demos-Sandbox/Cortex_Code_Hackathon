@@ -7,7 +7,48 @@
 
 ---
 
-## Antes de empezar
+## FASE 0: CREAR CUENTA TRIAL DE SNOWFLAKE (10 minutos)
+
+> **Objetivo:** Cada participante crea su propia cuenta trial de Snowflake para el hackathon.
+
+### Paso 0.1 — Registro en Snowflake
+
+1. Abre el navegador y ve a: **https://signup.snowflake.com/**
+2. Rellena el formulario con tu email corporativo
+3. En la pantalla de configuracion, selecciona:
+   - **Cloud Provider:** AWS
+   - **Edition:** Enterprise
+   - **Region:** US West (Oregon)
+4. Acepta los terminos y haz clic en **"Get Started"**
+5. Revisa tu email y haz clic en el enlace de activacion
+6. Establece tu usuario y contrasena
+
+> **Importante:** La cuenta trial incluye **$400 en creditos** y dura **30 dias**. Es mas que suficiente para el hackathon.
+
+### Paso 0.2 — Primer acceso y configuracion
+
+1. Accede a tu cuenta Snowflake desde la URL que recibiste por email
+2. Verifica que tienes el rol **ACCOUNTADMIN** (necesario para crear integraciones)
+3. Comprueba que el warehouse **COMPUTE_WH** esta disponible
+
+```
+Ejecuta: SELECT CURRENT_ACCOUNT(), CURRENT_ROLE(), CURRENT_WAREHOUSE(), CURRENT_REGION();
+```
+
+> **Resultado esperado:** Deberia mostrar tu cuenta, rol ACCOUNTADMIN, warehouse COMPUTE_WH y region AWS_US_WEST_2.
+
+### Paso 0.3 — Activar Cortex Code
+
+1. En Snowsight, ve a **Projects > Cortex Code** en el menu lateral izquierdo
+2. Si es la primera vez, acepta los terminos de uso de Cortex AI
+3. Abre una nueva sesion de Cortex Code
+4. Verifica que puedes ejecutar un prompt simple:
+
+```
+Dime que version de Snowflake estoy usando con SELECT CURRENT_VERSION();
+```
+
+> **Checkpoint:** Tienes tu cuenta trial activa, con Cortex Code funcionando y listo para empezar.
 
 ### Verificar acceso
 Abre Cortex Code y comprueba que puedes conectar con las credenciales de tu equipo.
@@ -974,3 +1015,89 @@ Usa st.metric para los KPIs, st.dataframe para las tablas y st.bar_chart para el
 - No gastar mas de 25 min en Bronze — la ingesta es el medio, no el fin
 - No olvidar preparar la demo — asignad a alguien desde el minuto 60
 - No ejecutar las vistas AI sin LIMIT — puede tardar mucho con todos los registros
+
+---
+
+## FASE FINAL: REVISION DE COSTES DEL HACKATHON
+
+> **Objetivo:** Revisar cuantos creditos ha consumido cada participante durante el hackathon, desglosado por servicio y funciones Cortex AI.
+
+### Coste total de la cuenta
+
+Ejecuta esta query para ver el consumo total de creditos durante el hackathon:
+
+```sql
+SELECT 
+    service_type, 
+    ROUND(SUM(credits_used), 2) AS total_credits, 
+    ROUND(SUM(credits_used) / SUM(SUM(credits_used)) OVER () * 100, 1) AS percentage_of_total 
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY 
+WHERE start_time >= '2026-05-28' 
+    AND start_time < '2026-05-29' 
+GROUP BY service_type 
+ORDER BY total_credits DESC;
+```
+
+### Consumo de funciones Cortex AI
+
+```sql
+SELECT 
+    function_name, 
+    model_name, 
+    SUM(tokens) AS total_tokens, 
+    ROUND(SUM(token_credits), 4) AS total_credits, 
+    COUNT(*) AS invocations 
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_FUNCTIONS_USAGE_HISTORY 
+WHERE start_time >= '2026-05-28' 
+    AND start_time < '2026-05-29' 
+GROUP BY function_name, model_name 
+ORDER BY total_credits DESC;
+```
+
+### Consumo de Cortex Analyst (Semantic View + Agent)
+
+```sql
+SELECT 
+    username, 
+    ROUND(SUM(credits), 4) AS total_credits, 
+    SUM(request_count) AS total_requests, 
+    ROUND(SUM(credits) / NULLIF(SUM(request_count), 0), 6) AS avg_credits_per_request 
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_ANALYST_USAGE_HISTORY 
+WHERE start_time >= '2026-05-28' 
+    AND start_time < '2026-05-29' 
+GROUP BY username 
+ORDER BY total_credits DESC;
+```
+
+### Consumo del warehouse
+
+```sql
+SELECT 
+    warehouse_name,
+    ROUND(SUM(credits_used), 2) AS total_credits,
+    ROUND(SUM(credits_used) * 3.00, 2) AS estimated_cost_usd
+FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY
+WHERE start_time >= '2026-05-28' 
+    AND start_time < '2026-05-29' 
+GROUP BY warehouse_name
+ORDER BY total_credits DESC;
+```
+
+### Resumen ejecutivo con Cortex Code
+
+Tambien puedes pedirle a CoCo que te haga el resumen:
+
+```
+Analiza el consumo de creditos de mi cuenta Snowflake durante el dia 28 de mayo de 2026.
+Dame un desglose por:
+1. Tipo de servicio (warehouse, cortex, serverless, etc.)
+2. Funciones Cortex AI utilizadas (modelo, tokens, creditos)
+3. Uso de Cortex Analyst (requests, creditos por usuario)
+4. Coste estimado total en USD (asumiendo $3/credito para Enterprise)
+
+Presenta los resultados en formato tabla.
+```
+
+> **Nota:** Las vistas de ACCOUNT_USAGE tienen un retraso de hasta 2 horas.
+> Si ejecutas las queries justo al terminar el hackathon, es posible que no veas
+> los datos mas recientes. Podeis revisarlo al dia siguiente para tener el dato completo.
