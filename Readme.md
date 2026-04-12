@@ -7,6 +7,8 @@
 **Asistentes:** 30 personas
 **Catering:** Comida servida a partir de las 13:30
 
+**Registro:** [https://www.snowflake.com/event/hackathon-cortex-code-experience-madrid-20260527/](https://www.snowflake.com/event/hackathon-cortex-code-experience-madrid-20260527/)
+
 ---
 
 ## Elige tu Industria
