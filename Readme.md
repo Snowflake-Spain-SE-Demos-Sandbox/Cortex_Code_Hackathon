@@ -23,6 +23,7 @@ Cada equipo selecciona una industria y trabaja con sus datos especificos:
 | 6 | 📺 **Media, Entertainment y Advertising** | `MEDIA_COPILOT` | [guia_media.md](guias/guia_media.md) | `data/media/` |
 | 7 | 🚚 **Transporte, Logistica y Travel** | `LOGISTICS_COPILOT` | [guia_logistics.md](guias/guia_logistics.md) | `data/logistics/` |
 | 8 | 🌐 **Sector Publico** | `PUBLIC_SECTOR_COPILOT` | [guia_public_sector.md](guias/guia_public_sector.md) | `data/public_sector/` |
+| 9 | 💧 **Utilities y Gestion del Agua** | `UTILITIES_COPILOT` | [guia_utilities.md](guias/guia_utilities.md) | `data/utilities/` |
 
 ---
 
