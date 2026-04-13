@@ -17,15 +17,15 @@ Ogni team seleziona un settore e lavora con i suoi dati specifici:
 
 | # | Settore | Database | Guida | Dataset |
 |---|---------|----------|-------|---------|
-| 1 | 📡 **Telecomunicazioni** | `TELCO_COPILOT` | [guia_telco.md](it/guia_telco.md) | `data/telco/` |
-| 2 | 🏦 **Servizi Finanziari** | `FSI_COPILOT` | [guia_fsi.md](it/guia_fsi.md) | `data/fsi/` |
-| 3 | 🛍️ **Retail e Beni di Consumo** | `RETAIL_COPILOT` | [guia_retail.md](it/guia_retail.md) | `data/retail/` |
-| 4 | 🏭 **Manifatturiero e Industria** | `MANUFACTURING_COPILOT` | [guia_manufacturing.md](it/guia_manufacturing.md) | `data/manufacturing/` |
-| 5 | 🏥 **Sanità e Life Sciences** | `HEALTHCARE_COPILOT` | [guia_healthcare.md](it/guia_healthcare.md) | `data/healthcare/` |
-| 6 | 📺 **Media, Entertainment e Advertising** | `MEDIA_COPILOT` | [guia_media.md](it/guia_media.md) | `data/media/` |
-| 7 | 🚚 **Trasporti, Logistica e Travel** | `LOGISTICS_COPILOT` | [guia_logistics.md](it/guia_logistics.md) | `data/logistics/` |
-| 8 | 🌐 **Settore Pubblico** | `PUBLIC_SECTOR_COPILOT` | [guia_public_sector.md](it/guia_public_sector.md) | `data/public_sector/` |
-| 9 | 💧 **Utilities e Gestione dell'Acqua** | `UTILITIES_COPILOT` | [guia_utilities.md](it/guia_utilities.md) | `data/utilities/` |
+| 1 | 📡 **Telecomunicazioni** | `TELCO_COPILOT` | [guia_telco.md](guias/it/guia_telco.md) | `data/telco/` |
+| 2 | 🏦 **Servizi Finanziari** | `FSI_COPILOT` | [guia_fsi.md](guias/it/guia_fsi.md) | `data/fsi/` |
+| 3 | 🛍️ **Retail e Beni di Consumo** | `RETAIL_COPILOT` | [guia_retail.md](guias/it/guia_retail.md) | `data/retail/` |
+| 4 | 🏭 **Manifatturiero e Industria** | `MANUFACTURING_COPILOT` | [guia_manufacturing.md](guias/it/guia_manufacturing.md) | `data/manufacturing/` |
+| 5 | 🏥 **Sanità e Life Sciences** | `HEALTHCARE_COPILOT` | [guia_healthcare.md](guias/it/guia_healthcare.md) | `data/healthcare/` |
+| 6 | 📺 **Media, Entertainment e Advertising** | `MEDIA_COPILOT` | [guia_media.md](guias/it/guia_media.md) | `data/media/` |
+| 7 | 🚚 **Trasporti, Logistica e Travel** | `LOGISTICS_COPILOT` | [guia_logistics.md](guias/it/guia_logistics.md) | `data/logistics/` |
+| 8 | 🌐 **Settore Pubblico** | `PUBLIC_SECTOR_COPILOT` | [guia_public_sector.md](guias/it/guia_public_sector.md) | `data/public_sector/` |
+| 9 | 💧 **Utilities e Gestione dell'Acqua** | `UTILITIES_COPILOT` | [guia_utilities.md](guias/it/guia_utilities.md) | `data/utilities/` |
 
 ---
 
