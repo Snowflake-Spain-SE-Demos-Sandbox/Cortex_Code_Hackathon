@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM LOGISTICS_COPILOT.BRONZE.RAW_SHIPMENTS; -- atteso: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Assicurati di essere in **Projects > Workspaces** in Snowsight per eseguire dbt.
+
 **[CoCo]** Inizializza dbt
 ```
 Crea un progetto dbt chiamato logistics_copilot connesso a LOGISTICS_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW LOGISTICS_COPILOT.GOLD.SV_LOGISTICS_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent in Snowflake Intelligence per Trasporti, Logistica e Travel.
+- Crea l'oggetto Snowflake Intelligence predefinito se non esiste
+- Crea il database SNOWFLAKE_INTELLIGENCE e lo schema AGENTS
+- Crea l'agente LOGISTICS_COPILOT_AGENT connesso alla Semantic View LOGISTICS_COPILOT.GOLD.SV_LOGISTICS_COPILOT
+  con modello di orchestrazione claude-4-sonnet, rispondendo sempre in italiano
+  e contesto di business: azienda di trasporti e logistica in Italia
+- Concedi accesso al ruolo PUBLIC all'agente e alla Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Apri **Snowsight > AI & ML > Snowflake Intelligence** e cerca l'agente.
+
+---
+
+## Prova l'Agente
+
+Domande di esempio per validare l'agente:
+
+- "Quali veicoli della flotta necessitano manutenzione urgente?"
+- "Quali percorsi hanno il tasso di incidenti piu alto?"
+- "Quante spedizioni hanno lo SLA non rispettato questa settimana?"
+- "Qual e il costo stimato degli incidenti aperti per zona?"
+
+---
+
+## FASE FINALE — App Streamlit in Snowflake
+
+**[CoCo]**
+```
+Crea un'app Streamlit in Snowflake (SiS) nel database LOGISTICS_COPILOT, schema AI, chiamata LOGISTICS_APP.
+L'app deve connettersi a Snowflake con la sessione attiva (get_active_session).
+Includi 4 sezioni usando st.tabs:
+1. KPI — card con st.metric con i totali e i ratio principali di VEHICLE_360
+2. Distribuzione — grafico a barre (st.bar_chart) per categoria/regione da ROUTE_HEALTH
+3. Top 20 — tabella interattiva (st.dataframe) ordinata per score di rischio da DELIVERY_RISK
+4. Tendenza — grafico a linee (st.line_chart) con l'evoluzione temporale degli eventi principali
+Usa titoli ed etichette descrittivi in italiano. Applica un tema scuro con st.set_page_config.
+```
