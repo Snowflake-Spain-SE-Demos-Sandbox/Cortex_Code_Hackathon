@@ -39,6 +39,8 @@ Ogni partecipante deve creare il proprio account trial **prima dell'evento**:
 4. Attivare l'account dall'email di conferma
 5. L'account include **$400 di crediti** e 30 giorni di validità
 
+(ALTER ACCOUNT DAB85420 SET COPILOT_ORCHESTRATOR_PARAM_153 = 'false' parameter_comment = 'Access for Enablement Session in Trial Account';)
+
 ---
 
 ## Obiettivo
