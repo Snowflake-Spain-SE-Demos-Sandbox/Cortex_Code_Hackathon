@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM LOGISTICS_COPILOT.BRONZE.RAW_SHIPMENTS; -- esperado: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Asegurate de estar en **Projects > Workspaces** en Snowsight para ejecutar dbt.
+
 **[CoCo]** Init dbt
 ```
 Crea un proyecto dbt llamado logistics_copilot conectado a LOGISTICS_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW LOGISTICS_COPILOT.GOLD.SV_LOGISTICS_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent en Snowflake Intelligence para Transporte, Logistica y Travel.
+- Crea el objeto Snowflake Intelligence predeterminado si no existe
+- Crea la base de datos SNOWFLAKE_INTELLIGENCE y el schema AGENTS
+- Crea el agente LOGISTICS_COPILOT_AGENT conectado a la Semantic View LOGISTICS_COPILOT.GOLD.SV_LOGISTICS_COPILOT
+  con modelo de orquestacion claude-4-sonnet, respondiendo siempre en espanol
+  y contexto de negocio: empresa de transporte y logistica en Espana
+- Concede acceso al rol PUBLIC al agente y a la Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Abre **Snowsight > AI & ML > Snowflake Intelligence** y busca el agente.
+
+---
+
+## Prueba el Agente
+
+Preguntas de ejemplo para validar el agente:
+
+- "¿Que vehiculos de la flota necesitan mantenimiento urgente?"
+- "¿Cuales son las rutas con mayor tasa de incidencias y retrasos?"
+- "¿Cuantos envios tienen el SLA incumplido esta semana?"
+- "¿Cual es el coste estimado de las incidencias abiertas por zona?"
+
+---
+
+## FASE FINAL — App Streamlit en Snowflake
+
+**[CoCo]**
+```
+Crea una app Streamlit in Snowflake (SiS) en la base de datos LOGISTICS_COPILOT, schema AI, llamada LOGISTICS_APP.
+La app debe conectarse a Snowflake con la sesion activa (get_active_session).
+Incluye 4 secciones usando st.tabs:
+1. KPI — tarjetas con st.metric con los totales y ratios principales de VEHICLE_360
+2. Distribucion — grafico de barras (st.bar_chart) por categoria/region desde ROUTE_HEALTH
+3. Top 20 — tabla interactiva (st.dataframe) ordenada por score de riesgo desde DELIVERY_RISK
+4. Tendencia — grafico de lineas (st.line_chart) con evolucion temporal de los eventos principales
+Usa titulos y etiquetas descriptivos en espanol. Aplica un tema oscuro con st.set_page_config.
+```

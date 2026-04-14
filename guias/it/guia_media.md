@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM MEDIA_COPILOT.BRONZE.RAW_CAMPAIGNS; -- atteso: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Assicurati di essere in **Projects > Workspaces** in Snowsight per eseguire dbt.
+
 **[CoCo]** Inizializza dbt
 ```
 Crea un progetto dbt chiamato media_copilot connesso a MEDIA_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW MEDIA_COPILOT.GOLD.SV_MEDIA_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent in Snowflake Intelligence per Media, Entertainment e Advertising.
+- Crea l'oggetto Snowflake Intelligence predefinito se non esiste
+- Crea il database SNOWFLAKE_INTELLIGENCE e lo schema AGENTS
+- Crea l'agente MEDIA_COPILOT_AGENT connesso alla Semantic View MEDIA_COPILOT.GOLD.SV_MEDIA_COPILOT
+  con modello di orchestrazione claude-4-sonnet, rispondendo sempre in italiano
+  e contesto di business: piattaforma di contenuti digitali e pubblicita in Italia
+- Concedi accesso al ruolo PUBLIC all'agente e alla Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Apri **Snowsight > AI & ML > Snowflake Intelligence** e cerca l'agente.
+
+---
+
+## Prova l'Agente
+
+Domande di esempio per validare l'agente:
+
+- "Quali utenti sono inattivi da piu di 30 giorni?"
+- "Quali generi di contenuto hanno il tasso di completion piu alto?"
+- "Quali campagne pubblicitarie hanno il CTR piu alto questo mese?"
+- "Quanti abbonati sono a rischio di cancellazione?"
+
+---
+
+## FASE FINALE — App Streamlit in Snowflake
+
+**[CoCo]**
+```
+Crea un'app Streamlit in Snowflake (SiS) nel database MEDIA_COPILOT, schema AI, chiamata MEDIA_APP.
+L'app deve connettersi a Snowflake con la sessione attiva (get_active_session).
+Includi 4 sezioni usando st.tabs:
+1. KPI — card con st.metric con i totali e i ratio principali di AUDIENCE_360
+2. Distribuzione — grafico a barre (st.bar_chart) per categoria/regione da CONTENT_PERFORMANCE
+3. Top 20 — tabella interattiva (st.dataframe) ordinata per score di rischio da AUDIENCE_CHURN_RISK
+4. Tendenza — grafico a linee (st.line_chart) con l'evoluzione temporale degli eventi principali
+Usa titoli ed etichette descrittivi in italiano. Applica un tema scuro con st.set_page_config.
+```

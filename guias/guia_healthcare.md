@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM HEALTHCARE_COPILOT.BRONZE.RAW_CLAIMS; -- esperado: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Asegurate de estar en **Projects > Workspaces** en Snowsight para ejecutar dbt.
+
 **[CoCo]** Init dbt
 ```
 Crea un proyecto dbt llamado healthcare_copilot conectado a HEALTHCARE_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW HEALTHCARE_COPILOT.GOLD.SV_HEALTHCARE_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent en Snowflake Intelligence para Healthcare y Life Sciences.
+- Crea el objeto Snowflake Intelligence predeterminado si no existe
+- Crea la base de datos SNOWFLAKE_INTELLIGENCE y el schema AGENTS
+- Crea el agente HEALTHCARE_COPILOT_AGENT conectado a la Semantic View HEALTHCARE_COPILOT.GOLD.SV_HEALTHCARE_COPILOT
+  con modelo de orquestacion claude-4-sonnet, respondiendo siempre en espanol
+  y contexto de negocio: organizacion sanitaria en Espana (hospital/clinica)
+- Concede acceso al rol PUBLIC al agente y a la Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Abre **Snowsight > AI & ML > Snowflake Intelligence** y busca el agente.
+
+---
+
+## Prueba el Agente
+
+Preguntas de ejemplo para validar el agente:
+
+- "¿Que pacientes tienen mayor riesgo de reingreso urgente?"
+- "¿Cuales son los departamentos con mayor tasa de urgencias?"
+- "¿Cuantas notas clinicas requieren seguimiento inmediato?"
+- "¿Cual es el importe total de reclamaciones pendientes de resolucion?"
+
+---
+
+## FASE FINAL — App Streamlit en Snowflake
+
+**[CoCo]**
+```
+Crea una app Streamlit in Snowflake (SiS) en la base de datos HEALTHCARE_COPILOT, schema AI, llamada HEALTHCARE_APP.
+La app debe conectarse a Snowflake con la sesion activa (get_active_session).
+Incluye 4 secciones usando st.tabs:
+1. KPI — tarjetas con st.metric con los totales y ratios principales de PATIENT_360
+2. Distribucion — grafico de barras (st.bar_chart) por categoria/region desde CLINICAL_HEALTH
+3. Top 20 — tabla interactiva (st.dataframe) ordenada por score de riesgo desde READMISSION_RISK
+4. Tendencia — grafico de lineas (st.line_chart) con evolucion temporal de los eventos principales
+Usa titulos y etiquetas descriptivos en espanol. Aplica un tema oscuro con st.set_page_config.
+```

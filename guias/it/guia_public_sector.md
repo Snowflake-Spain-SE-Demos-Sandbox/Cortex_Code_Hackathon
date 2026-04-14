@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM PUBLIC_SECTOR_COPILOT.BRONZE.RAW_BUDGET; -- atteso: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Assicurati di essere in **Projects > Workspaces** in Snowsight per eseguire dbt.
+
 **[CoCo]** Inizializza dbt
 ```
 Crea un progetto dbt chiamato public_sector_copilot connesso a PUBLIC_SECTOR_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW PUBLIC_SECTOR_COPILOT.GOLD.SV_PUBLIC_SECTOR_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent in Snowflake Intelligence per Settore Pubblico.
+- Crea l'oggetto Snowflake Intelligence predefinito se non esiste
+- Crea il database SNOWFLAKE_INTELLIGENCE e lo schema AGENTS
+- Crea l'agente PUBLIC_SECTOR_COPILOT_AGENT connesso alla Semantic View PUBLIC_SECTOR_COPILOT.GOLD.SV_PUBLIC_SECTOR_COPILOT
+  con modello di orchestrazione claude-4-sonnet, rispondendo sempre in italiano
+  e contesto di business: pubblica amministrazione / comune in Italia
+- Concedi accesso al ruolo PUBLIC all'agente e alla Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Apri **Snowsight > AI & ML > Snowflake Intelligence** e cerca l'agente.
+
+---
+
+## Prova l'Agente
+
+Domande di esempio per validare l'agente:
+
+- "Quali dipartimenti hanno piu richieste in attesa fuori dai tempi?"
+- "Qual e la percentuale di esecuzione del bilancio per dipartimento?"
+- "Quante ispezioni gravi sono senza risoluzione questo trimestre?"
+- "Quali servizi superano il tempo di risposta obiettivo?"
+
+---
+
+## FASE FINALE — App Streamlit in Snowflake
+
+**[CoCo]**
+```
+Crea un'app Streamlit in Snowflake (SiS) nel database PUBLIC_SECTOR_COPILOT, schema AI, chiamata PUBLIC_SECTOR_APP.
+L'app deve connettersi a Snowflake con la sessione attiva (get_active_session).
+Includi 4 sezioni usando st.tabs:
+1. KPI — card con st.metric con i totali e i ratio principali di CITIZEN_360
+2. Distribuzione — grafico a barre (st.bar_chart) per categoria/regione da SERVICE_HEALTH
+3. Top 20 — tabella interattiva (st.dataframe) ordinata per score di rischio da BUDGET_EXECUTION
+4. Tendenza — grafico a linee (st.line_chart) con l'evoluzione temporale degli eventi principali
+Usa titoli ed etichette descrittivi in italiano. Applica un tema scuro con st.set_page_config.
+```

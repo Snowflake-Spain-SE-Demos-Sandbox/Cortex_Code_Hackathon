@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM UTILITIES_COPILOT.BRONZE.RAW_WATER_QUALITY; -- atteso: 2,00
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Assicurati di essere in **Projects > Workspaces** in Snowsight per eseguire dbt.
+
 **[CoCo]** Inizializza dbt
 ```
 Crea un progetto dbt chiamato utilities_copilot connesso a UTILITIES_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW UTILITIES_COPILOT.GOLD.SV_UTILITIES_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent in Snowflake Intelligence per Utilities e Gestione dell'Acqua.
+- Crea l'oggetto Snowflake Intelligence predefinito se non esiste
+- Crea il database SNOWFLAKE_INTELLIGENCE e lo schema AGENTS
+- Crea l'agente UTILITIES_COPILOT_AGENT connesso alla Semantic View UTILITIES_COPILOT.GOLD.SV_UTILITIES_COPILOT
+  con modello di orchestrazione claude-4-sonnet, rispondendo sempre in italiano
+  e contesto di business: azienda di gestione dell'acqua e utilities in Italia (Veolia, Acque Italiane, ACEA, Gruppo CAP)
+- Concedi accesso al ruolo PUBLIC all'agente e alla Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Apri **Snowsight > AI & ML > Snowflake Intelligence** e cerca l'agente.
+
+---
+
+## Prova l'Agente
+
+Domande di esempio per validare l'agente:
+
+- "Quali impianti hanno maggior rischio di non conformita regolatoria?"
+- "Quanti allarmi critici SCADA sono attivi in questo momento?"
+- "Quali parametri della qualita dell'acqua sono fuori dai limiti legali?"
+- "Dammi lo stato operativo di tutti gli impianti ad alta criticita."
+
+---
+
+## FASE FINALE — App Streamlit in Snowflake
+
+**[CoCo]**
+```
+Crea un'app Streamlit in Snowflake (SiS) nel database UTILITIES_COPILOT, schema AI, chiamata UTILITIES_APP.
+L'app deve connettersi a Snowflake con la sessione attiva (get_active_session).
+Includi 4 sezioni usando st.tabs:
+1. KPI — card con st.metric con i totali e i ratio principali di PLANT_360
+2. Distribuzione — grafico a barre (st.bar_chart) per categoria/regione da OPERATIONAL_HEALTH
+3. Top 20 — tabella interattiva (st.dataframe) ordinata per score di rischio da COMPLIANCE_RISK
+4. Tendenza — grafico a linee (st.line_chart) con l'evoluzione temporale degli eventi principali
+Usa titoli ed etichette descrittivi in italiano. Applica un tema scuro con st.set_page_config.
+```

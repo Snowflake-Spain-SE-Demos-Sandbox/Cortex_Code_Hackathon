@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM MEDIA_COPILOT.BRONZE.RAW_CAMPAIGNS; -- esperado: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Asegurate de estar en **Projects > Workspaces** en Snowsight para ejecutar dbt.
+
 **[CoCo]** Init dbt
 ```
 Crea un proyecto dbt llamado media_copilot conectado a MEDIA_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW MEDIA_COPILOT.GOLD.SV_MEDIA_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent en Snowflake Intelligence para Media, Entertainment y Advertising.
+- Crea el objeto Snowflake Intelligence predeterminado si no existe
+- Crea la base de datos SNOWFLAKE_INTELLIGENCE y el schema AGENTS
+- Crea el agente MEDIA_COPILOT_AGENT conectado a la Semantic View MEDIA_COPILOT.GOLD.SV_MEDIA_COPILOT
+  con modelo de orquestacion claude-4-sonnet, respondiendo siempre en espanol
+  y contexto de negocio: plataforma de contenido digital y publicidad en Espana
+- Concede acceso al rol PUBLIC al agente y a la Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Abre **Snowsight > AI & ML > Snowflake Intelligence** y busca el agente.
+
+---
+
+## Prueba el Agente
+
+Preguntas de ejemplo para validar el agente:
+
+- "¿Que usuarios llevan mas de 30 dias sin actividad?"
+- "¿Cuales son los generos de contenido con mayor tasa de completion?"
+- "¿Que campanas publicitarias tienen el CTR mas alto este mes?"
+- "¿Cuantos suscriptores estan en riesgo de cancelar?"
+
+---
+
+## FASE FINAL — App Streamlit en Snowflake
+
+**[CoCo]**
+```
+Crea una app Streamlit in Snowflake (SiS) en la base de datos MEDIA_COPILOT, schema AI, llamada MEDIA_APP.
+La app debe conectarse a Snowflake con la sesion activa (get_active_session).
+Incluye 4 secciones usando st.tabs:
+1. KPI — tarjetas con st.metric con los totales y ratios principales de AUDIENCE_360
+2. Distribucion — grafico de barras (st.bar_chart) por categoria/region desde CONTENT_PERFORMANCE
+3. Top 20 — tabla interactiva (st.dataframe) ordenada por score de riesgo desde AUDIENCE_CHURN_RISK
+4. Tendencia — grafico de lineas (st.line_chart) con evolucion temporal de los eventos principales
+Usa titulos y etiquetas descriptivos en espanol. Aplica un tema oscuro con st.set_page_config.
+```

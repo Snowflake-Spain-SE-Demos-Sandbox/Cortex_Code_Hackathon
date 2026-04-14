@@ -57,6 +57,8 @@ SELECT COUNT(*) FROM FSI_COPILOT.BRONZE.RAW_ACCOUNTS; -- esperado: 2,000
 
 ## FASE 2 — Silver (dbt)
 
+> **Nota:** Asegurate de estar en **Projects > Workspaces** en Snowsight para ejecutar dbt.
+
 **[CoCo]** Init dbt
 ```
 Crea un proyecto dbt llamado fsi_copilot conectado a FSI_COPILOT.
@@ -211,8 +213,22 @@ DESCRIBE SEMANTIC VIEW FSI_COPILOT.GOLD.SV_FSI_COPILOT;
 
 ## FASE 5 — Cortex Agent
 
+**[CoCo]**
+```
+Crea un Cortex Agent en Snowflake Intelligence para Servicios Financieros.
+- Crea el objeto Snowflake Intelligence predeterminado si no existe
+- Crea la base de datos SNOWFLAKE_INTELLIGENCE y el schema AGENTS
+- Crea el agente FSI_COPILOT_AGENT conectado a la Semantic View FSI_COPILOT.GOLD.SV_FSI_COPILOT
+  con modelo de orquestacion claude-4-sonnet, respondiendo siempre en espanol
+  y contexto de negocio: entidad financiera en Espana (banca, inversiones, seguros)
+- Concede acceso al rol PUBLIC al agente y a la Semantic View
+```
+
 **[SQL]**
 ```sql
+CREATE SNOWFLAKE INTELLIGENCE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE PUBLIC;
+
 CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
 CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.AGENTS;
 
@@ -253,3 +269,30 @@ SHOW AGENTS IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 ```
 
 > Abre **Snowsight > AI & ML > Snowflake Intelligence** y busca el agente.
+
+---
+
+## Prueba el Agente
+
+Preguntas de ejemplo para validar el agente:
+
+- "¿Que clientes tienen el compliance score mas bajo?"
+- "¿Cuantas alertas de riesgo critico estan abiertas ahora mismo?"
+- "¿Cual es el volumen total de transacciones rechazadas este mes?"
+- "¿Que clientes tienen el KYC vencido o proximo a vencer?"
+
+---
+
+## FASE FINAL — App Streamlit en Snowflake
+
+**[CoCo]**
+```
+Crea una app Streamlit in Snowflake (SiS) en la base de datos FSI_COPILOT, schema AI, llamada FSI_APP.
+La app debe conectarse a Snowflake con la sesion activa (get_active_session).
+Incluye 4 secciones usando st.tabs:
+1. KPI — tarjetas con st.metric con los totales y ratios principales de CLIENT_360
+2. Distribucion — grafico de barras (st.bar_chart) por categoria/region desde TRANSACTION_HEALTH
+3. Top 20 — tabla interactiva (st.dataframe) ordenada por score de riesgo desde RISK_EXPOSURE
+4. Tendencia — grafico de lineas (st.line_chart) con evolucion temporal de los eventos principales
+Usa titulos y etiquetas descriptivos en espanol. Aplica un tema oscuro con st.set_page_config.
+```
