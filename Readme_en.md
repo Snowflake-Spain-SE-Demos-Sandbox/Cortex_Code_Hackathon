@@ -23,16 +23,16 @@ A technical hackathon where teams build an **industry-specific AI copilot** on S
 
 | # | Industry | Database | English Guide | Data folder |
 |---|----------|----------|---------------|-------------|
-| 1 | 📡 **Telecommunications** | TELCO_COPILOT | guias/en/guia_telco.md | data/telco/ |
-| 2 | 🏦 **Financial Services** | FSI_COPILOT | guias/en/guia_fsi.md | data/fsi/ |
-| 3 | 🛍️ **Retail & Consumer Goods** | RETAIL_COPILOT | guias/en/guia_retail.md | data/retail/ |
-| 4 | 🏭 **Manufacturing & Industry** | MANUFACTURING_COPILOT | guias/en/guia_manufacturing.md | data/manufacturing/ |
-| 5 | 🏥 **Healthcare & Life Sciences** | HEALTHCARE_COPILOT | guias/en/guia_healthcare.md | data/healthcare/ |
-| 6 | 📺 **Media, Entertainment & Ads** | MEDIA_COPILOT | guias/en/guia_media.md | data/media/ |
-| 7 | 🚚 **Transport, Logistics & Travel** | LOGISTICS_COPILOT | guias/en/guia_logistics.md | data/logistics/ |
-| 8 | 🌐 **Public Sector** | PUBLIC_SECTOR_COPILOT | guias/en/guia_public_sector.md | data/public_sector/ |
-| 9 | 💧 **Utilities & Water Management** | UTILITIES_COPILOT | guias/en/guia_utilities.md | data/utilities/ |
-| 10 | 🛡️ **Insurance — Call Center AI** | INSURANCE_COPILOT | guias/en/guia_insurance.md | data/insurance/ |
+| 1 | 📡 **Telecommunications** | TELCO_COPILOT | [guia_telco.md](guias/en/guia_telco.md) | data/telco/ |
+| 2 | 🏦 **Financial Services** | FSI_COPILOT | [guia_fsi.md](guias/en/guia_fsi.md) | data/fsi/ |
+| 3 | 🛍️ **Retail & Consumer Goods** | RETAIL_COPILOT | [guia_retail.md](guias/en/guia_retail.md) | data/retail/ |
+| 4 | 🏭 **Manufacturing & Industry** | MANUFACTURING_COPILOT | [guia_manufacturing.md](guias/en/guia_manufacturing.md) | data/manufacturing/ |
+| 5 | 🏥 **Healthcare & Life Sciences** | HEALTHCARE_COPILOT | [guia_healthcare.md](guias/en/guia_healthcare.md) | data/healthcare/ |
+| 6 | 📺 **Media, Entertainment & Ads** | MEDIA_COPILOT | [guia_media.md](guias/en/guia_media.md) | data/media/ |
+| 7 | 🚚 **Transport, Logistics & Travel** | LOGISTICS_COPILOT | [guia_logistics.md](guias/en/guia_logistics.md) | data/logistics/ |
+| 8 | 🌐 **Public Sector** | PUBLIC_SECTOR_COPILOT | [guia_public_sector.md](guias/en/guia_public_sector.md) | data/public_sector/ |
+| 9 | 💧 **Utilities & Water Management** | UTILITIES_COPILOT | [guia_utilities.md](guias/en/guia_utilities.md) | data/utilities/ |
+| 10 | 🛡️ **Insurance — Call Center AI** | INSURANCE_COPILOT | [guia_insurance.md](guias/en/guia_insurance.md) | data/insurance/ |
 
 ---
 
