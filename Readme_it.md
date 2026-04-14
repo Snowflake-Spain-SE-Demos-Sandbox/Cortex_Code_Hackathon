@@ -26,6 +26,9 @@ Ogni team seleziona un settore e lavora con i suoi dati specifici:
 | 7 | 🚚 **Trasporti, Logistica e Travel** | `LOGISTICS_COPILOT` | [guia_logistics.md](guias/it/guia_logistics.md) | `data/logistics/` |
 | 8 | 🌐 **Settore Pubblico** | `PUBLIC_SECTOR_COPILOT` | [guia_public_sector.md](guias/it/guia_public_sector.md) | `data/public_sector/` |
 | 9 | 💧 **Utilities e Gestione dell'Acqua** | `UTILITIES_COPILOT` | [guia_utilities.md](guias/it/guia_utilities.md) | `data/utilities/` |
+| 10 | 🛡️ **Assicurazioni — Call Center AI** | `INSURANCE_COPILOT` | [guia_insurance.md](guias/it/guia_insurance.md) | `data/insurance/` |
+
+> **Settore speciale:** Il caso d'uso Assicurazioni include una **FASE 4 di Machine Learning** (rilevamento churn con `SNOWFLAKE.ML.CLASSIFICATION`) e **5 casi d'uso AI** su trascrizioni reali di chiamate di 5-10 minuti.
 
 ---
 
@@ -46,11 +49,14 @@ Ogni partecipante deve creare il proprio account trial **prima dell'evento**:
 ## Obiettivo
 
 Ogni team costruirà una mini piattaforma end-to-end per il proprio settore usando Snowflake Cortex Code come unico IDE:
+
 - Connettere un repository Git di GitHub a Snowflake e ingerire dati JSON
 - Trasformare con il pattern medallion Bronze / Silver / Gold usando dbt
-- Applicare 3 casi d'uso AI con Cortex sul livello Gold
+- Applicare casi d'uso AI con Cortex COMPLETE sul livello Gold
+- *(Solo Assicurazioni)* Addestrare un modello predittivo di churn con `SNOWFLAKE.ML.CLASSIFICATION`
 - Creare una Semantic View per query in linguaggio naturale (NL2SQL)
 - Distribuire un Cortex Agent come Copilot in Snowflake Intelligence
+- Visualizzare i risultati in un'app Streamlit in Snowflake
 
 ---
 
@@ -61,14 +67,15 @@ Ogni team costruirà una mini piattaforma end-to-end per il proprio settore usan
 | 09:30 - 10:00 | 30 min | **Accoglienza e registrazione** | Accreditamento, distribuzione materiali, caffè di benvenuto |
 | 10:00 - 10:15 | 15 min | **Benvenuto** | Apertura istituzionale Snowflake. Presentazione dell'evento |
 | 10:15 - 10:35 | 20 min | **Keynote: Cortex Code** | Demo live di Cortex Code: flusso Git > Bronze > Silver > Gold > AI > SV > Agent |
-| 10:35 - 10:45 | 10 min | **Presentazione della sfida** | Spiegazione dei settori disponibili e delle 5 fasi dell'hackathon |
+| 10:35 - 10:45 | 10 min | **Presentazione della sfida** | Spiegazione dei settori disponibili e delle fasi dell'hackathon |
 | 10:45 - 10:50 | 5 min | **Formazione dei team** | Scelta del settore, assegnazione dei tavoli, distribuzione delle guide |
 | 10:50 - 12:20 | 90 min | **Hackathon** | Lavoro in team seguendo la guida del proprio settore |
-| | | *Fase 1 - Bronze (25 min)* | Connettere il repo Git e ingerire JSON come livello Bronze |
-| | | *Fase 2 - Silver/Gold (35 min)* | Trasformazione con dbt: tabelle normalizzate e KPI |
-| | | *Fase 3 - AI (20 min)* | 3 casi d'uso AI con Cortex COMPLETE |
-| | | *Fase 4 - Semantic View (5 min)* | Modello semantico NL2SQL |
-| | | *Fase 5 - Agent (5 min)* | Copilot in Snowflake Intelligence |
+| | | *Fase 1 - Bronze (20 min)* | Connettere il repo Git e ingerire JSON come livello Bronze |
+| | | *Fase 2 - Silver/Gold (30 min)* | Trasformazione con dbt: tabelle normalizzate e KPI |
+| | | *Fase 3 - AI (20 min)* | Casi d'uso AI con Cortex COMPLETE |
+| | | *Fase 4 - ML (10 min)* | *(Solo Assicurazioni)* Modello churn con Snowflake ML |
+| | | *Fase 5/6 - Semantic View + Agent (10 min)* | Modello semantico NL2SQL + Copilot in Snowflake Intelligence |
+| | | *Fase Finale - Streamlit (10 min)* | App Streamlit con le 4 sezioni |
 | 12:20 - 12:30 | 10 min | **Coffee break** | Pausa, preparazione delle demo |
 | 12:30 - 13:00 | 30 min | **Demo dei team** | 5 min per team |
 | 13:00 - 13:15 | 15 min | **Premi** | Votazione e consegna dei premi |
@@ -76,7 +83,9 @@ Ogni team costruirà una mini piattaforma end-to-end per il proprio settore usan
 
 ---
 
-## Architettura della Sfida (comune a tutti i settori)
+## Architettura della Sfida
+
+### Settori standard (9 settori)
 
 ```
 GitHub Repo (JSON) --> Git Integration --> Snowflake
@@ -87,16 +96,43 @@ GitHub Repo (JSON) --> Git Integration --> Snowflake
         |
    [  GOLD  ]  KPI e viste analitiche (3 modelli per settore)
         |
-   [   AI   ]  3 Casi d'Uso con Cortex COMPLETE
+   [   AI   ]  3 Casi d'Uso con Cortex COMPLETE (llama3.1-70b)
         |
    [SEM.VIEW]  Modello semantico NL2SQL (Cortex Analyst)
         |
-   [ AGENT  ]  Copilot in Snowflake Intelligence
+   [ AGENT  ]  Copilot in Snowflake Intelligence (claude-4-sonnet)
+        |
+   [  APP   ]  Dashboard Streamlit in Snowflake
+```
+
+### Settore speciale: Assicurazioni — Call Center AI
+
+```
+GitHub Repo (JSON) --> Git Integration --> Snowflake
+        |
+   [ BRONZE ]  4 file: customers, call_transcripts, claims, agents
+        |
+   [ SILVER ]  Tabelle normalizzate con dbt
+        |
+   [  GOLD  ]  CUSTOMER_RISK_360 | CALL_INTELLIGENCE_360 | AGENT_PERFORMANCE
+        |
+   [   AI   ]  5 Casi AI: riassunto chiamate | classificazione+routing |
+               QA agenti | CX insights | rilevamento segnali churn
+        |
+   [   ML   ]  SNOWFLAKE.ML.CLASSIFICATION — modello predittivo di churn
+        |
+   [SEM.VIEW]  Semantic View NL2SQL su Gold + AI
+        |
+   [ AGENT  ]  Copilot in Snowflake Intelligence (claude-4-sonnet)
+        |
+   [  APP   ]  Streamlit: KPI | Chiamate | Churn Risk | Performance Agenti
 ```
 
 ---
 
 ## Dataset per Settore
+
+### Settori standard (1-9)
 
 Ogni settore include 4 file JSON con la stessa struttura di volumetria:
 
@@ -106,6 +142,17 @@ Ogni settore include 4 file JSON con la stessa struttura di volumetria:
 | Eventi operativi | 10.000 | Transazioni, letture, ordini, incontri, ecc. |
 | Ticket / Incidenti | 750 | Alert, casi, ordini di lavoro, note cliniche, ecc. |
 | Dati finanziari | 2.000 | Fatturazione, conti, spedizioni, bilanci, ecc. |
+
+### Settore 10: Assicurazioni — Call Center AI
+
+Dataset specializzato per l'analisi delle chiamate al call center (assicurazioni auto e casa):
+
+| File | Record | Contenuto |
+|------|--------|-----------|
+| `customers.json` | 350 | Clienti con polizze auto, casa o entrambe. Premio annuale, storico sinistri, NPS, stato |
+| `call_transcripts.json` | 500 | Trascrizioni complete di chiamate di 5-10 min (8 tipi: sinistro, cancellazione, reclamo, rinnovo, ecc.) |
+| `claims.json` | 1.000 | Sinistri con tipo, importi, franchigia, stato e giorni di risoluzione |
+| `agents.json` | 50 | Agenti con team, esperienza, FCR, AHT e QA score |
 
 **Repository:** https://github.com/Snowflake-Spain-SE-Demos-Sandbox/Cortex_Code_Hackathon
 **Percorso:** `data/{settore}/`
@@ -118,7 +165,7 @@ Ogni settore include 4 file JSON con la stessa struttura di volumetria:
 |----------|------|
 | Funzionalità end-to-end (da Bronze ad Agent) | 30% |
 | Uso efficace di Cortex Code | 20% |
-| Qualità dei 3 casi AI | 20% |
+| Qualità dei casi AI (e ML per Assicurazioni) | 20% |
 | Semantic View + Cortex Agent | 15% |
 | Presentazione e storytelling | 15% |
 
